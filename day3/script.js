@@ -56,12 +56,12 @@ function countByCategory() {
 
 
 // 4. getSummary()
-// Returns a sentence summarising the number of notes
-// in each category.
 function getSummary() {
     const counts = countByCategory();
+    const total = notes.length;
+    const word = total === 1 ? "note" : "notes";
 
-    return `Notes: ${counts.personal || 0} personal, ${counts.work || 0} work, ${counts.study || 0} study.`;
+    return `${total} ${word}: ${counts.personal || 0} personal, ${counts.work || 0} work, ${counts.study || 0} study.`;
 }
 
 
@@ -82,6 +82,7 @@ function addNote(text, category) {
 
     const cleanedText = text.trim();
     const cleanedCategory = category.trim().toLowerCase();
+
     if (cleanedText.length < 1 || cleanedText.length > 200) {
         console.log("Note was not added: text must be between 1 and 200 characters.");
         return false;
@@ -115,53 +116,58 @@ function addNote(text, category) {
 }
 
 // searchNotes()
-console.log("Search 'javascript':");
 console.log(searchNotes("javascript"));
 
-console.log("Search 'JAVASCRIPT':");
-console.log(searchNotes("JAVASCRIPT"));
+console.log(searchNotes("EMAIL"));
 
-console.log("Search with no results:");
 console.log(searchNotes("football"));
 
 
 // longestNote()
-console.log("Longest note:");
 console.log(longestNote());
+
+const savedNotes = notes;
+notes = [];
+
+console.log(longestNote());
+
+notes = savedNotes;
 
 
 // countByCategory()
-console.log("Notes by category:");
 console.log(countByCategory());
+
+console.log(countByCategory().personal);
 
 
 // getSummary()
-console.log("Summary:");
 console.log(getSummary());
+
+notes = [
+    {id: 1, text: "Study javascript", category: "study"},
+];
+
+console.log(getSummary());
+
+//restore original notes
+notes = savedNotes;
 
 
 // isDuplicate()
-console.log("Duplicate 'Call mum':");
 console.log(isDuplicate("Call mum"));
 
-console.log("Duplicate '  CALL MUM  ':");
 console.log(isDuplicate("  CALL MUM  "));
 
-console.log("Duplicate 'Go shopping':");
 console.log(isDuplicate("Go shopping"));
 
 
 // addNote()
-console.log("Adding a valid note:");
 console.log(addNote("Prepare for the JavaScript test", "study"));
 
-console.log("Adding a duplicate note:");
 console.log(addNote("Call mum", "personal"));
 
-console.log("Adding an invalid category:");
 console.log(addNote("Buy a new laptop", "shopping"));
 
-console.log("Adding an empty note:");
 console.log(addNote("", "personal"));
 
 console.log("Final notes:");
