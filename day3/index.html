@@ -3,12 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes Toolkit</title>
+    <title>Quick Notes</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <header>
+        <h1>QuickNotes</h1>
+        <p>Capture ideas before they disappear</p>
+    </header>
+    <main>
+        <section>
+            <h1>Add a note</h1>
+            <form id="note-form">
+                <label for="note-input">Note Input</label>
+                <input type="text" id="note-input" placeholder="Type a note..."/>
+                <button type="submit">Add Note</button> 
+            </form>
+        </section>
 
-    <p>Open the Console to see the results.</p>
+        <section>
+            <h2>Your Notes</h2>
+            <p id="note-count">You have no notes</p>
+            <!-- ADDED: The missing notes container -->
+            <ul id="notes-list"></ul> 
+        </section>
+    </main>
 
-    <script src="script.js" defer></script>
+    <footer>
+        <p>&copy; 2026 QuickNotes. Built during web foundations.</p>
+    </footer>
+    <script src="index.js" defer></script>
 </body>
 </html>
