@@ -155,6 +155,12 @@ Two people click the same seat at the same moment. We make sure only one wins us
 ```sql
 BEGIN;
 
+-- Lock the requested rows in a fixed (sorted) order to avoid deadlocks.
+SELECT id FROM seats
+WHERE event_id = :event_id AND id IN (:seat_ids)
+ORDER BY id
+FOR UPDATE;
+
 UPDATE seats
 SET status = 'HELD',
     held_by = :user_id,
@@ -172,9 +178,9 @@ WHERE event_id = :event_id
 Why this works:
 
 - The check ("is it available?") and the change ("make it mine") happen in **one statement**. There is no gap between them for another request to slip into.
-- When two transactions update the same row, the database takes a **row lock**. The second one waits, then re-checks the `WHERE` condition on the new state, sees `HELD`, and updates 0 rows. Exactly one request wins.
+- When two transactions want the same row, the database takes a **row lock**. The second one waits, then re-checks the `WHERE` condition on the new state, sees `HELD`, and updates 0 rows. Exactly one request wins.
 - Requests for multiple seats are all-or-nothing. If one seat fails, the whole transaction rolls back, so no one ends up with half an order.
-- Seat IDs are always processed in sorted order, so two buyers who want overlapping seats cannot deadlock each other.
+- The `SELECT ... ORDER BY id FOR UPDATE` locks seats in sorted order, so two buyers who want overlapping seats cannot deadlock each other.
 
 ### Step 2: Paying (confirming the sale)
 
@@ -233,6 +239,29 @@ flowchart TD
     API --> Q[Job queue]
     Q --> W[Workers: hold expiry, emails, ticket delivery]
     W --> DBP
+```
+
+Plain-text version of the same diagram:
+
+```
+Browser ──> CDN (event pages, images, CSS, JS)
+   │
+   v
+Load balancer + rate limiter ──> Waiting room (virtual queue, big sales only)
+                                      │
+                                      v
+                          API servers (stateless, auto-scaled)
+                            │            │              │
+                            v            v              v
+                     Redis cache    Primary DB      Payment provider
+                     (events,       (PostgreSQL:
+                      seat map)      all holds and
+                                     sales)
+                                        │
+                                        v
+                                  Read replicas (search, my tickets)
+
+API servers ──> Job queue ──> Workers (hold expiry, emails, ticket delivery) ──> Primary DB
 ```
 
 ### Components
